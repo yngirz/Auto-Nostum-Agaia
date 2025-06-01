@@ -1,0 +1,13 @@
+{
+    "name": "nostrum-agaia",
+    "author": "Yngir",
+    "description": "Ensures that your Elite/Tera Club Everful Nostrum/Noctenium is up 100% of the time.",
+    "version": "2.2",
+    "options": {
+        "cliName": "Nostrum Agaia",
+        "guiName": "Nostrum Agaia",
+        "settingsVersion": 3,
+        "settingsFile": "config.json",
+        "settingsMigrator": "settings_migrator.js"
+    }
+}

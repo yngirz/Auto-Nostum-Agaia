@@ -1,0 +1,13 @@
+{
+    "version": 3,
+    "data": {
+        "enabled": true,
+        "hide_duration": true,
+        "hide_message": true,
+        "keep_resurrection_invincibility": false,
+        "dungeon_only": false,
+        "civil_unrest": false,
+        "interval": 1000,
+        "selected_buff": 7
+    }
+}
