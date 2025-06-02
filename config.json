@@ -8,6 +8,6 @@
         "dungeon_only": false,
         "civil_unrest": false,
         "interval": 1000,
-        "selected_buff": 7
+        "selected_buff": 6
     }
 }
