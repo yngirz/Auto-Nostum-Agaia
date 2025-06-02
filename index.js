@@ -3,7 +3,8 @@ const BUFFS_NOSTRUM = [4030, 4031, 4032, 4033],
       BUFFS_NOCTENIUM_STRONGER = [920, 921, 922],
       BUFF_RES_INVINCIBLE = 1134,
       BUFF_PHOENIX = 6007,
-      BUFF_FOOD = 70244;
+      BUFF_FOOD_70244 = 70244,
+      BUFF_FOOD_70243 = 70243;
 
 const SettingsUI = require('tera-mod-ui').Settings;
 
@@ -39,23 +40,39 @@ function NetworkMod(mod) {
     });
 
     function getSelectedPremiumItem() {
-        const slotIndex = mod.settings.selected_buff - 1;
-        return premiumSlots.find(entry => entry.slot === slotIndex);
+        const slotIndex = mod.settings.selected_buff;
+        const found = premiumSlots.find(entry => entry.slot === slotIndex);
+        return found;
     }
 
     function useBuffSlotIfNeeded() {
-        const noNostrum = BUFFS_NOSTRUM.every(buff => abnormalityDuration(buff) <= BigInt(60 * 1000));
-        const foodLow = abnormalityDuration(BUFF_FOOD) <= BigInt(60 * 1000);
-    
-        if (!(noNostrum || foodLow)) return;
-    
+        const sixtySeconds = BigInt(300 * 1000);
+
+        const nostrumActive = BUFFS_NOSTRUM.some(buff => abnormalityDuration(buff) > 0n);
+        const foodDur70244 = abnormalityDuration(BUFF_FOOD_70244);
+        const foodDur70243 = abnormalityDuration(BUFF_FOOD_70243);
+
+        let currentFoodBuff = null;
+        let currentFoodDuration = 0n;
+
+        if (foodDur70244 > 0n) {
+            currentFoodBuff = BUFF_FOOD_70244;
+            currentFoodDuration = foodDur70244;
+        } else if (foodDur70243 > 0n) {
+            currentFoodBuff = BUFF_FOOD_70243;
+            currentFoodDuration = foodDur70243;
+        }
+
+        const shouldUseSlot = !nostrumActive || !currentFoodBuff || currentFoodDuration <= sixtySeconds;
+
+        if (!shouldUseSlot) return;
+
         if (mod.settings.keep_resurrection_invincibility && abnormalityDuration(BUFF_RES_INVINCIBLE) > 0n) return;
-    
         if (abnormalityDuration(BUFF_PHOENIX) > 0n) return;
-    
+
         const item = getSelectedPremiumItem();
         if (!item) return;
-    
+
         mod.send('C_USE_PREMIUM_SLOT', 1, {
             set: item.set,
             slot: item.slot,
@@ -63,14 +80,12 @@ function NetworkMod(mod) {
             id: item.id
         });
     }
-    
 
     function useNoctenium() {
         if (BUFFS_NOCTENIUM_STRONGER.some(buff => abnormalityDuration(buff) > 0n)) return;
         if (BUFFS_NOCTENIUM.some(buff => abnormalityDuration(buff) > BigInt(60 * 1000))) return;
 
-        const slotIndex = 7;
-        const item = premiumSlots.find(entry => entry.slot === slotIndex);
+        const item = getSelectedPremiumItem();
         if (!item) return;
 
         mod.send('C_USE_PREMIUM_SLOT', 1, {
@@ -82,15 +97,15 @@ function NetworkMod(mod) {
     }
 
     function usePremiumItems() {
-        if (!mod.settings.enabled || 
-            (mod.settings.dungeon_only && !mod.game.me.inDungeon) || 
+        if (!mod.settings.enabled ||
+            (mod.settings.dungeon_only && !mod.game.me.inDungeon) ||
             (!mod.settings.civil_unrest && mod.game.me.inCivilUnrest)) return;
 
-        if (!mod.game.isIngame || 
-            mod.game.isInLoadingScreen || 
-            !mod.game.me.alive || 
-            mod.game.me.mounted || 
-            mod.game.me.inBattleground || 
+        if (!mod.game.isIngame ||
+            mod.game.isInLoadingScreen ||
+            !mod.game.me.alive ||
+            mod.game.me.mounted ||
+            mod.game.me.inBattleground ||
             mod.game.contract.active) return;
 
         useBuffSlotIfNeeded();
