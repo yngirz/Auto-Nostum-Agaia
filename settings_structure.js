@@ -38,9 +38,9 @@ module.exports = [
     },
     {
         "key": "selected_buff",
-        "name": "Brave = 7, Strong = 8",
+        "name": "Premium Slot to Use (Brave = 6, Strong = 7)",
         "type": "range",
-        "min": 7,
-        "max": 8
+        "min": 6,
+        "max": 7
     }
 ];
